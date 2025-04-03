@@ -1,0 +1,259 @@
+.container {
+  min-height: 100vh;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: var(--background-color);
+}
+
+.main {
+  padding: 2rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.backButton {
+  text-decoration: none;
+  color: var(--primary-color);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  transition: color 0.2s;
+}
+
+.backButton:hover {
+  color: var(--primary-dark);
+}
+
+.title {
+  margin: 0;
+  line-height: 1.15;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.riskBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  display: inline-block;
+}
+
+.riskLow {
+  background-color: var(--risk-low);
+}
+
+.riskMedium {
+  background-color: var(--risk-medium);
+}
+
+.riskHigh {
+  background-color: var(--risk-high);
+}
+
+.riskLowMedium {
+  background: linear-gradient(to right, var(--risk-low), var(--risk-medium));
+}
+
+.riskMediumHigh {
+  background: linear-gradient(to right, var(--risk-medium), var(--risk-high));
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 2rem;
+  width: 100%;
+}
+
+.strategyOverview, .strategyExplanation {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: var(--card-background);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.description {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.statItem {
+  padding: 1rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.allocationContainer {
+  margin-top: 1rem;
+}
+
+.allocationItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.allocationLabel {
+  width: 120px;
+  font-weight: 500;
+}
+
+.allocationBar {
+  flex: 1;
+  height: 12px;
+  background-color: var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 0 1rem;
+}
+
+.allocationFill {
+  height: 100%;
+  background-color: var(--primary-color);
+  border-radius: 6px;
+}
+
+.allocationValue {
+  width: 60px;
+  text-align: right;
+  font-weight: 500;
+}
+
+.explanationContent {
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.explanationContent h2, .explanationContent h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.explanationContent ul, .explanationContent ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.explanationContent li {
+  margin-bottom: 0.5rem;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.primaryButton, .secondaryButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primaryButton {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.primaryButton:hover {
+  background-color: var(--primary-dark);
+}
+
+.secondaryButton {
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.secondaryButton:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.disclaimerBox {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--warning-color);
+}
+
+.disclaimerBox h3 {
+  color: var(--warning-color);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+}
+
+.loadingSpinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid var(--primary-color);
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}

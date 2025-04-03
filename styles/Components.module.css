@@ -1,0 +1,620 @@
+/* Common Component Styles */
+.card {
+  background-color: var(--card-background);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* WalletConnect Component */
+.walletConnectContainer {
+  width: 100%;
+  max-width: 600px;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.connectButton {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.connectButton:hover {
+  background-color: var(--primary-dark);
+}
+
+.connectButton svg {
+  margin-right: 8px;
+}
+
+.errorMessage {
+  color: var(--error-color);
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.walletInfo {
+  margin-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+
+.walletInfo h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.walletInfo ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.walletInfo li {
+  margin-bottom: 0.5rem;
+}
+
+.privacyNote {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  padding: 0.75rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+}
+
+/* Asset Display Component */
+.portfolioSummary {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.portfolioValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.portfolioValue span {
+  color: var(--primary-color);
+}
+
+.portfolioComposition {
+  margin-top: 1.5rem;
+}
+
+.portfolioComposition h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.assetDistribution {
+  display: flex;
+  height: 24px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.distributionItem {
+  height: 100%;
+  min-width: 3%;
+}
+
+.distributionBar {
+  height: 100%;
+}
+
+.distributionLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+
+.legendName {
+  margin-right: 6px;
+  font-weight: 500;
+}
+
+.legendPercentage {
+  color: var(--text-light);
+}
+
+.assetList {
+  margin-bottom: 1.5rem;
+}
+
+.assetItem {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.assetItem:last-child {
+  border-bottom: none;
+}
+
+.assetIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+.assetDetails {
+  flex: 1;
+}
+
+.assetName {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.assetBalance {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.assetValue {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.networkBadge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  margin-left: 0.75rem;
+  vertical-align: middle;
+}
+
+/* Network Switch Component */
+.networkSwitchContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.networkButton {
+  display: flex;
+  align-items: center;
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.networkButton:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.networkIcon {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.networkName {
+  margin-right: 0.5rem;
+}
+
+.networkDropdownIcon {
+  font-size: 0.7rem;
+}
+
+.networkDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 200px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.networkList {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.networkOption {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.networkOption:hover {
+  background-color: var(--background-color);
+}
+
+.networkOptionName {
+  font-size: 0.9rem;
+}
+
+.networkError {
+  padding: 0.75rem;
+  color: var(--error-color);
+  font-size: 0.8rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-top: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.noAssets {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+}
+
+.assetNote {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+.assetActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.refreshButton, .scanButton {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refreshButton {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.refreshButton:hover {
+  background-color: var(--primary-dark);
+}
+
+.scanButton {
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.scanButton:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Strategy Recommendation Component */
+.strategyContainer {
+  width: 100%;
+  max-width: 1000px;
+}
+
+.strategyIntro {
+  margin-bottom: 1.5rem;
+}
+
+.noStrategiesPlaceholder, .loadingPlaceholder {
+  background-color: var(--card-background);
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.noStrategiesPlaceholder p, .loadingPlaceholder p {
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.noStrategiesPlaceholder ul {
+  display: inline-block;
+  text-align: left;
+  margin: 1rem auto;
+  padding-left: 2rem;
+}
+
+.noStrategiesPlaceholder li {
+  margin-bottom: 0.5rem;
+  color: var(--text-light);
+}
+
+.loadingSpinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.strategyCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.strategyCard {
+  background-color: var(--card-background);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.strategyCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.selectedStrategy {
+  border-color: var(--primary-color);
+}
+
+.strategyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.strategyHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.riskBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+}
+
+.riskLow {
+  background-color: var(--risk-low);
+}
+
+.riskMedium {
+  background-color: var(--risk-medium);
+}
+
+.riskHigh {
+  background-color: var(--risk-high);
+}
+
+.strategyBody {
+  margin-bottom: 1rem;
+}
+
+.allocationContainer {
+  margin-bottom: 1.5rem;
+}
+
+.allocationContainer h4 {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-dark);
+}
+
+.allocationGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.allocationItem {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.allocationBar {
+  height: 12px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.allocationLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.assetName {
+  font-weight: 500;
+}
+
+.assetPercentage {
+  color: var(--text-light);
+}
+
+.strategyDetails {
+  margin-top: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.detailLabel {
+  font-weight: 600;
+  width: 120px;
+  color: var(--text-light);
+}
+
+.detailValue {
+  flex: 1;
+}
+
+.strategyFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.learnMoreBtn, .implementBtn, .refreshButton, .scanButton {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.learnMoreBtn {
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  display: inline-block;
+  text-align: center;
+}
+
+.learnMoreBtn:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.implementBtn {
+  background-color: var(--primary-color);
+  border: none;
+  color: white;
+}
+
+.implementBtn:hover {
+  background-color: var(--primary-dark);
+}
+
+.saveBtn {
+  background-color: transparent;
+  border: 1px solid var(--text-light);
+  color: var(--text-light);
+  transition: all 0.2s;
+}
+
+.saveBtn:hover {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.saveBtn.saved {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.disclaimerSection {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.disclaimerSection h4 {
+  color: var(--warning-color);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+/* Loading State Component */
+.loadingContainer {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Loading spinner moved to consolidated definition above */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingMessage {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.loadingDescription {
+  text-align: center;
+  color: var(--text-light);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .strategyCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+}
