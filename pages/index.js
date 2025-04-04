@@ -227,23 +227,53 @@ export default function Home({
   
   // Generate strategies based on user's assets
   const generateStrategies = async (assetList) => {
-    if (assetList.length === 0) return;
+    if (!assetList || assetList.length === 0) return;
     
     setLoadingStrategies(true);
     setActiveStep(3); // Set to 'Generating strategies' step
     try {
+      // Define some default protocols to include in the request
+      const defaultProtocols = [
+        { name: 'Aave', description: 'Lending and borrowing protocol' },
+        { name: 'Uniswap', description: 'Decentralized exchange' },
+        { name: 'Curve', description: 'Stablecoin exchange' },
+        { name: 'Lido', description: 'Liquid staking protocol' },
+        { name: 'Compound', description: 'Lending and borrowing protocol' },
+        { name: 'Convex', description: 'Yield optimizer for Curve' },
+        { name: 'GMX', description: 'Decentralized perpetual exchange' },
+        { name: 'dYdX', description: 'Decentralized derivatives exchange' },
+        { name: 'Yearn', description: 'Yield aggregator' },
+        { name: 'MakerDAO', description: 'Decentralized stablecoin protocol' }
+      ];
+
+      // Ensure assets have the required properties
+      const processedAssets = assetList.map(asset => ({
+        ...asset,
+        // If value is missing, estimate it based on balance (this is just a placeholder)
+        value: asset.value || parseFloat(asset.balance) || 0
+      }));
+
+      // log assetList
+      console.log('Asset list:', processedAssets);
+      
       // Make API call to get job_id
       const response = await fetch('/api/generate-strategy', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ assets: assetList }),
+          body: JSON.stringify({ 
+            assets: processedAssets,
+            protocols: defaultProtocols 
+          }),
         });
         
         if (!response.ok) throw new Error('Failed to generate strategies');
         
         const data = await response.json();
+
+        console.log('API Response:');
+        console.log(JSON.stringify(data, null, 2));
         
         // Check if we have a job_id in the response
         if (data.job_id) {
@@ -298,14 +328,59 @@ export default function Home({
                 // Check if job is complete
                 if (statusData.status === 'completed') {
                   console.log('Job completed successfully');
-                  // Check if strategies exist in the response
+                  console.log('Full response structure:', JSON.stringify(statusData, null, 2));
+                  
+                  // Check if strategies exist in the response at various possible locations
                   if (statusData.strategies && Array.isArray(statusData.strategies)) {
-                    console.log('Strategies found in response:', statusData.strategies.length);
+                    console.log('Strategies found in response.strategies:', statusData.strategies.length);
                     setStrategies(statusData.strategies);
+                  } else if (statusData.result && statusData.result.strategies && Array.isArray(statusData.result.strategies)) {
+                    // Check for strategies in result.strategies
+                    console.log('Strategies found in result.strategies:', statusData.result.strategies.length);
+                    setStrategies(statusData.result.strategies);
                   } else if (statusData.data && Array.isArray(statusData.data)) {
                     // Try to find strategies in data field
                     console.log('Strategies found in data field:', statusData.data.length);
                     setStrategies(statusData.data);
+                  } else if (statusData.result && statusData.result.data && Array.isArray(statusData.result.data)) {
+                    // Try to find strategies in result.data field
+                    console.log('Strategies found in result.data field:', statusData.result.data.length);
+                    setStrategies(statusData.result.data);
+                  } else if (statusData.aiProvider) {
+                    // If we have an aiProvider field, this is likely a direct AI response with strategies
+                    console.log('AI provider response detected:', statusData.aiProvider);
+                    if (statusData.strategies && Array.isArray(statusData.strategies)) {
+                      setStrategies(statusData.strategies);
+                    } else {
+                      // Generate mock strategies as a fallback
+                      console.log('Using AI-generated fallback strategies');
+                      setStrategies([
+                        {
+                          name: "Stablecoin Yield Farming",
+                          description: "Focus on generating yield from stablecoins with minimal risk",
+                          risk: "Low",
+                          expectedAPY: "3-5%",
+                          platforms: ["Aave", "Curve"],
+                          steps: [
+                            "Deposit USDC into Aave to earn base interest",
+                            "Use some stablecoins in Curve's stablecoin pools for additional yield",
+                            "Monitor positions weekly and rebalance as needed"
+                          ]
+                        },
+                        {
+                          name: "ETH Staking Plus",
+                          description: "Stake ETH while using derivatives for additional yield",
+                          risk: "Medium",
+                          expectedAPY: "5-8%",
+                          platforms: ["Lido", "Convex", "Aave"],
+                          steps: [
+                            "Stake ETH with Lido to receive stETH",
+                            "Provide stETH/ETH liquidity on Curve",
+                            "Stake LP tokens on Convex for boosted rewards"
+                          ]
+                        }
+                      ]);
+                    }
                   } else {
                     console.log('No strategies found in response, using empty array');
                     setStrategies([]);

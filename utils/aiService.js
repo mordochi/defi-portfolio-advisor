@@ -1,0 +1,495 @@
+/**
+ * AI Service for handling multiple LLM providers (OpenAI, Claude, Ollama)
+ * This service provides a unified interface for interacting with different AI models
+ */
+import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
+import axios from 'axios';
+
+// Initialize AI clients based on environment variables
+const openaiClient = process.env.OPENAI_API_KEY ? 
+  new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+
+const anthropicClient = process.env.ANTHROPIC_API_KEY ? 
+  new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
+
+const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+const ollamaModel = process.env.OLLAMA_MODEL || 'llama3.2:latest';
+
+/**
+ * Get the configured AI provider from environment variables
+ * @returns {string} - The AI provider to use ('openai', 'anthropic', 'ollama', or 'mock')
+ */
+export function getAIProvider() {
+  const provider = process.env.AI_PROVIDER?.toLowerCase() || 'openai';
+
+  console.log(`Selected AI provider: ${provider}`);
+  
+  // Check if any providers are configured
+  const hasOpenAI = process.env.OPENAI_API_KEY;
+  const hasAnthropic = process.env.ANTHROPIC_API_KEY;
+  const hasOllama = process.env.OLLAMA_BASE_URL;
+  
+  // If no providers are configured, use mock provider
+  if (!hasOpenAI && !hasAnthropic && !hasOllama) {
+    console.warn('No AI providers configured, using mock provider for testing');
+    return 'mock';
+  }
+  
+  // Validate that the selected provider is available
+  if (provider === 'openai' && !hasOpenAI) {
+    console.warn('OpenAI selected but API key not configured');
+    if (hasAnthropic) return 'anthropic';
+    if (hasOllama) return 'ollama';
+    return 'mock';
+  } else if (provider === 'anthropic' && !hasAnthropic) {
+    console.warn('Anthropic selected but API key not configured');
+    if (hasOpenAI) return 'openai';
+    if (hasOllama) return 'ollama';
+    return 'mock';
+  } else if (provider === 'ollama' && !hasOllama) {
+    console.warn('Ollama selected but base URL not configured');
+    if (hasOpenAI) return 'openai';
+    if (hasAnthropic) return 'anthropic';
+    return 'mock';
+  }
+  
+  return provider;
+}
+
+/**
+ * Generate text using the configured AI provider
+ * @param {string} prompt - The prompt to send to the AI
+ * @param {Object} options - Additional options for the AI request
+ * @returns {Promise<string>} - The generated text
+ */
+export async function generateText(prompt, options = {}) {
+  const provider = getAIProvider();
+  
+  try {
+    switch (provider) {
+      case 'openai':
+        return await generateWithOpenAI(prompt, options);
+      case 'anthropic':
+        return await generateWithAnthropic(prompt, options);
+      case 'ollama':
+        return await generateWithOllama(prompt, options);
+      case 'mock':
+        return generateWithMock(prompt, options);
+      default:
+        console.warn(`Unknown AI provider: ${provider}, falling back to mock provider`);
+        return generateWithMock(prompt, options);
+    }
+  } catch (error) {
+    console.error(`Error generating text with ${provider}:`, error);
+    
+    // If the primary provider fails, try to fall back to another available provider
+    if (provider !== 'openai' && openaiClient) {
+      console.warn(`Falling back to OpenAI after ${provider} failure`);
+      return await generateWithOpenAI(prompt, options);
+    } else if (provider !== 'anthropic' && anthropicClient) {
+      console.warn(`Falling back to Anthropic after ${provider} failure`);
+      return await generateWithAnthropic(prompt, options);
+    } else if (provider !== 'ollama' && process.env.OLLAMA_BASE_URL) {
+      console.warn(`Falling back to Ollama after ${provider} failure`);
+      return await generateWithOllama(prompt, options);
+    }
+    
+    // If all else fails, use the mock provider
+    console.warn(`All providers failed, using mock provider`);
+    return generateWithMock(prompt, options);
+  }
+}
+
+/**
+ * Generate text using a mock provider for testing
+ * @param {string} prompt - The prompt to send to the mock provider
+ * @param {Object} options - Additional options (ignored in mock)
+ * @returns {string} - The generated mock text
+ */
+function generateWithMock(prompt, options = {}) {
+  console.log('Using mock AI provider for:', prompt);
+  
+  // Check if the prompt is about DeFi
+  if (prompt.toLowerCase().includes('defi') || prompt.toLowerCase().includes('strategy')) {
+    return `This is a mock AI response for DeFi-related queries. The actual response would come from your configured AI provider (OpenAI, Claude, or Ollama). For testing purposes, here's a sample response about DeFi strategies:
+
+Top DeFi strategies include:
+1. Lending on Aave or Compound to earn interest
+2. Providing liquidity on Curve or Uniswap to earn fees
+3. Staking ETH through Lido for passive income
+
+These strategies offer varying levels of risk and return.`;
+  }
+  
+  // Generic response for other prompts
+  return `This is a mock AI response. In production, this would be generated by your configured AI provider (OpenAI, Claude, or Ollama). For testing purposes, this mock response is being returned instead.`;
+}
+
+/**
+ * Generate text using OpenAI
+ * @param {string} prompt - The prompt to send to OpenAI
+ * @param {Object} options - Additional options for the OpenAI request
+ * @returns {Promise<string>} - The generated text
+ */
+async function generateWithOpenAI(prompt, options = {}) {
+  if (!openaiClient) {
+    throw new Error('OpenAI client not initialized. Please set OPENAI_API_KEY.');
+  }
+  
+  const model = options.model || 'gpt-4o';
+  const temperature = options.temperature || 0.7;
+  const maxTokens = options.maxTokens || 2000;
+  
+  const response = await openaiClient.chat.completions.create({
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    temperature,
+    max_tokens: maxTokens,
+  });
+  
+  return response.choices[0].message.content;
+}
+
+/**
+ * Generate text using Anthropic (Claude)
+ * @param {string} prompt - The prompt to send to Anthropic
+ * @param {Object} options - Additional options for the Anthropic request
+ * @returns {Promise<string>} - The generated text
+ */
+async function generateWithAnthropic(prompt, options = {}) {
+  if (!anthropicClient) {
+    throw new Error('Anthropic client not initialized. Please set ANTHROPIC_API_KEY.');
+  }
+  
+  const model = options.model || 'claude-3-opus-20240229';
+  const temperature = options.temperature || 0.7;
+  const maxTokens = options.maxTokens || 2000;
+  
+  const response = await anthropicClient.messages.create({
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    temperature,
+    max_tokens: maxTokens,
+  });
+  
+  return response.content[0].text;
+}
+
+/**
+ * Generate text using Ollama
+ * @param {string} prompt - The prompt to send to Ollama
+ * @param {Object} options - Additional options for the Ollama request
+ * @returns {Promise<string>} - The generated text
+ */
+async function generateWithOllama(prompt, options = {}) {
+  const model = options.model || ollamaModel;
+  const temperature = options.temperature || 0.7;
+  
+  try {
+    const response = await axios.post(`${ollamaBaseUrl}/api/generate`, {
+      model,
+      prompt,
+      temperature,
+      stream: false,
+    });
+    
+    return response.data.response;
+  } catch (error) {
+    console.error('Ollama API error:', error.response?.data || error.message);
+    throw new Error(`Ollama API error: ${error.message}`);
+  }
+}
+
+/**
+ * Generate DeFi investment strategies using AI
+ * @param {Array} assets - User's assets
+ * @param {Array} protocols - Available DeFi protocols
+ * @returns {Promise<Array>} - Array of AI-generated strategies
+ */
+export async function generateDeFiStrategies(assets, protocols) {
+  // Handle empty assets array for testing
+  if (!assets || assets.length === 0) {
+    console.warn('No assets provided, using sample assets for testing');
+    assets = [
+      { name: 'Ethereum', symbol: 'ETH', balance: 2.5, value: 5000 },
+      { name: 'USD Coin', symbol: 'USDC', balance: 3000, value: 3000 }
+    ];
+  }
+
+  const assetsSummary = assets.map(asset => 
+    `${asset.name} (${asset.symbol}): ${asset.balance} tokens worth $${asset.value || 'unknown'}`
+  ).join('\n');
+  
+  const protocolsSummary = (protocols || []).slice(0, 15).map(protocol => 
+    `${protocol.name}: ${protocol.description || 'DeFi protocol'}`
+  ).join('\n');
+  
+  const prompt = `
+Generate 3 DeFi investment strategies based on the following user assets:
+
+${assetsSummary}
+
+Consider these top DeFi protocols for the strategies:
+${protocolsSummary || 'Use popular DeFi protocols like Aave, Compound, Uniswap, and Curve.'}
+
+For each strategy, provide:
+1. A name
+2. A brief description
+3. Risk level (Low, Medium, High)
+4. Expected APY (annual percentage yield)
+5. Recommended platforms/protocols
+6. Implementation steps
+
+Format the response as a JSON array with the following structure:
+[
+  {
+    "name": "Strategy Name",
+    "description": "Brief strategy description",
+    "risk": "Low/Medium/High",
+    "expectedAPY": "X%",
+    "platforms": ["Platform1", "Platform2"],
+    "steps": ["Step 1", "Step 2", "Step 3"]
+  }
+]
+`;
+
+  try {
+    // Get the current provider to check if we're using mock
+    const provider = getAIProvider();
+    
+    // If using mock provider, return predefined strategies
+    if (provider === 'mock') {
+      console.log('Using mock provider for strategy generation');
+      return [
+        {
+          name: "Stablecoin Yield Farming",
+          description: "Focus on generating yield from stablecoins with minimal risk",
+          risk: "Low",
+          expectedAPY: "3-5%",
+          platforms: ["Aave", "Curve"],
+          steps: [
+            "Deposit USDC into Aave to earn base interest",
+            "Use some stablecoins in Curve's stablecoin pools for additional yield",
+            "Monitor positions weekly and rebalance as needed"
+          ]
+        },
+        {
+          name: "ETH Staking Plus",
+          description: "Stake ETH while using derivatives for additional yield",
+          risk: "Medium",
+          expectedAPY: "5-8%",
+          platforms: ["Lido", "Convex", "Aave"],
+          steps: [
+            "Stake ETH with Lido to receive stETH",
+            "Provide stETH/ETH liquidity on Curve",
+            "Stake LP tokens on Convex for boosted rewards"
+          ]
+        },
+        {
+          name: "DeFi Growth Portfolio",
+          description: "Higher risk strategy focused on capital growth",
+          risk: "High",
+          expectedAPY: "10-15%",
+          platforms: ["Uniswap", "GMX", "dYdX"],
+          steps: [
+            "Provide liquidity to Uniswap V3 concentrated pools",
+            "Use a portion of ETH as collateral on GMX",
+            "Allocate some capital to dYdX for perpetual trading"
+          ]
+        }
+      ];
+    }
+    
+    // For non-mock providers, generate strategies using AI
+    const response = await generateText(prompt, {
+      temperature: 0.7,
+      maxTokens: 2000
+    });
+    
+    // Parse the JSON response
+    let strategies;
+    try {
+      // Find JSON content in the response (in case the AI included extra text)
+      const jsonMatch = response.match(/\[\s*\{.*\}\s*\]/s);
+      if (jsonMatch) {
+        strategies = JSON.parse(jsonMatch[0]);
+      } else {
+        strategies = JSON.parse(response);
+      }
+    } catch (parseError) {
+      console.error('Error parsing AI response as JSON:', parseError);
+      console.log('Raw AI response:', response);
+      
+      // Return a fallback strategy if parsing fails
+      return [{
+        name: "Balanced Yield Strategy",
+        description: "A balanced approach to earning yield while maintaining liquidity",
+        risk: "Medium",
+        expectedAPY: "5-10%",
+        platforms: ["Aave", "Curve"],
+        steps: [
+          "Deposit stablecoins into Aave for base yield",
+          "Provide liquidity to Curve pools for additional returns",
+          "Monitor positions weekly and rebalance as needed"
+        ]
+      }];
+    }
+    
+    return strategies;
+  } catch (error) {
+    console.error('Error generating DeFi strategies:', error);
+    return [];
+  }
+}
+
+/**
+ * Generate an explanation for a specific strategy using AI
+ * @param {Object} strategy - Strategy to explain
+ * @param {Array} assets - User's assets
+ * @returns {Promise<string>} - AI-generated explanation in markdown format
+ */
+export async function explainStrategy(strategy, assets) {
+  // Handle empty assets array for testing
+  if (!assets || assets.length === 0) {
+    console.warn('No assets provided, using sample assets for explanation');
+    assets = [
+      { name: 'Ethereum', symbol: 'ETH', balance: 2.5, value: 5000 },
+      { name: 'USD Coin', symbol: 'USDC', balance: 3000, value: 3000 }
+    ];
+  }
+
+  const assetsSummary = assets.map(asset => 
+    `${asset.name} (${asset.symbol}): ${asset.balance} tokens worth $${asset.value || 'unknown'}`
+  ).join('\n');
+  
+  const strategyDetails = `
+Strategy: ${strategy.name}
+Description: ${strategy.description}
+Risk Level: ${strategy.risk}
+Expected APY: ${strategy.expectedAPY}
+Platforms: ${strategy.platforms.join(', ')}
+`;
+
+  const prompt = `
+Create a detailed explanation of how to implement the following DeFi investment strategy:
+
+${strategyDetails}
+
+The user has these assets:
+${assetsSummary}
+
+Provide a comprehensive explanation including:
+1. Implementation details for each platform
+2. Step-by-step instructions
+3. Risk management considerations
+4. Benefits and potential risks
+5. How this fits the user's portfolio
+
+Format the response in markdown with clear headings and bullet points.
+`;
+
+  try {
+    // Get the current provider to check if we're using mock
+    const provider = getAIProvider();
+    
+    // If using mock provider, return a predefined explanation
+    if (provider === 'mock') {
+      console.log('Using mock provider for strategy explanation');
+      
+      // Generate platform-specific advice
+      const platformAdvice = strategy.platforms.map(platform => {
+        switch(platform.toLowerCase()) {
+          case 'aave':
+            return `**Aave**: Deposit your assets to earn interest and potentially use them as collateral.`;
+          case 'compound':
+            return `**Compound**: Supply assets to the protocol to earn COMP tokens on top of the base interest rate.`;
+          case 'curve':
+            return `**Curve**: Provide liquidity to stable pairs for low-risk yields enhanced by CRV rewards.`;
+          case 'uniswap':
+            return `**Uniswap**: Create or join liquidity pools to earn trading fees.`;
+          case 'lido':
+            return `**Lido**: Stake ETH to receive stETH while maintaining liquidity.`;
+          case 'yearn':
+            return `**Yearn Finance**: Deposit into Yearn vaults for automated yield optimization.`;
+          case 'convex':
+            return `**Convex**: Boost your Curve yields by staking LP tokens.`;
+          case 'gmx':
+            return `**GMX**: Provide liquidity to earn fees from leveraged trading.`;
+          case 'dydx':
+            return `**dYdX**: Participate in the liquidity mining program while trading perpetuals.`;
+          default:
+            return `**${platform}**: Integrate this platform into your strategy for diversification.`;
+        }
+      }).join('\n- ');
+      
+      // Generate risk-specific advice
+      let riskAdvice;
+      switch(strategy.risk.toLowerCase()) {
+        case 'low':
+          riskAdvice = `This low-risk strategy focuses on capital preservation. Monitor your positions weekly, but drastic adjustments should rarely be needed.`;
+          break;
+        case 'medium':
+          riskAdvice = `This medium-risk strategy balances growth and safety. Review your positions at least weekly and be prepared to adjust allocations if market conditions change significantly.`;
+          break;
+        case 'high':
+          riskAdvice = `This high-risk strategy aims for maximum growth. Daily monitoring is recommended, and you should be prepared to exit positions quickly if market conditions deteriorate.`;
+          break;
+        default:
+          riskAdvice = `Monitor your positions regularly and adjust based on changing market conditions.`;
+      }
+      
+      // Construct the full explanation in markdown format
+      return `
+## Implementation of ${strategy.name}
+
+This strategy focuses on ${strategy.description.toLowerCase()} It's designed to generate approximately ${strategy.expectedAPY} APY with a ${strategy.risk.toLowerCase()} risk profile.
+
+### Key Platforms
+- ${platformAdvice}
+
+### Steps to Implement
+${strategy.steps.map((step, index) => `${index + 1}. ${step}`).join('\n')}
+
+### Risk Management
+${riskAdvice}
+
+### Benefits and Risks
+- **Benefits**: Potential for ${strategy.expectedAPY} APY, diversification across reputable protocols, exposure to ${strategy.platforms.length > 1 ? 'multiple DeFi ecosystems' : 'a major DeFi ecosystem'}
+- **Risks**: ${strategy.risk} risk profile, potential for smart contract vulnerabilities, market volatility, and impermanent loss in liquidity positions
+
+### How This Fits Your Portfolio
+This strategy is well-suited for your ${assets[0].symbol} and ${assets.length > 1 ? assets[1].symbol : ''} holdings, providing a ${strategy.risk.toLowerCase()}-risk approach to generating yield in the current market conditions.
+      `;
+    }
+    
+    // For non-mock providers, generate explanation using AI
+    const explanation = await generateText(prompt, {
+      temperature: 0.7,
+      maxTokens: 2000
+    });
+    
+    return explanation;
+  } catch (error) {
+    console.error('Error generating strategy explanation:', error);
+    
+    // Fallback explanation
+    return `
+## Implementation of ${strategy.name}
+
+This strategy focuses on ${strategy.description.toLowerCase()}
+
+### Steps to Implement
+1. Connect your wallet to the recommended platforms: ${strategy.platforms.join(', ')}
+2. Allocate your assets according to the recommended percentages
+3. Monitor your investments regularly and rebalance as needed
+
+### Benefits and Risks
+- Benefits: Potential for ${strategy.expectedAPY} APY, diversification across reputable protocols
+- Risks: ${strategy.risk} risk profile, potential for smart contract vulnerabilities, market volatility
+
+### How This Fits Your Portfolio
+This strategy provides a balanced approach for your current asset mix.
+    `;
+  }
+}

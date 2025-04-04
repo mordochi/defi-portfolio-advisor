@@ -2,6 +2,7 @@
  * API endpoint to generate explanations for DeFi investment strategies
  * This endpoint uses AI to create detailed explanations for investment strategies
  */
+import { explainStrategy, getAIProvider } from '../../utils/aiService';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,16 +16,31 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Strategy is required' });
     }
 
-    // In a production environment, this would call an AI service like OpenAI
-    // For now, we'll generate a structured explanation based on the strategy data
+    // Get the current AI provider being used
+    const aiProvider = getAIProvider();
+    console.log(`Using AI provider: ${aiProvider} for strategy explanation`);
     
-    // Create a detailed explanation based on the strategy properties
-    const explanation = generateExplanation(strategy, assets);
+    // Generate explanation using the AI service
+    const explanation = await explainStrategy(strategy, assets);
     
-    return res.status(200).json({ explanation });
+    return res.status(200).json({ 
+      explanation,
+      aiProvider 
+    });
   } catch (error) {
     console.error('Error generating strategy explanation:', error);
-    return res.status(500).json({ error: 'Failed to generate explanation' });
+    
+    // Fall back to the template-based explanation if AI fails
+    try {
+      const { strategy, assets } = req.body;
+      const fallbackExplanation = generateExplanation(strategy, assets);
+      return res.status(200).json({ 
+        explanation: fallbackExplanation,
+        aiProvider: 'fallback-template' 
+      });
+    } catch (fallbackError) {
+      return res.status(500).json({ error: 'Failed to generate explanation' });
+    }
   }
 }
 

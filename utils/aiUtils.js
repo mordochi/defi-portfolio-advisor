@@ -2,7 +2,7 @@
  * Generate investment strategies using AI via the server-side API
  * @param {Array} assets - User's assets
  * @param {Array} protocols - Available DeFi protocols
- * @returns {Promise<Array>} - Array of AI-generated strategies
+ * @returns {Promise<Object>} - Object containing strategies and AI provider info
  */
 export async function generateAIStrategies(assets, protocols) {
   try {
@@ -23,18 +23,24 @@ export async function generateAIStrategies(assets, protocols) {
     }
     
     const data = await response.json();
-    return data.strategies;
+    return {
+      strategies: data.strategies || [],
+      aiProvider: data.aiProvider || 'unknown'
+    };
   } catch (error) {
     console.error('Error generating AI strategies:', error);
     // Return an empty array to indicate no strategies are available
-    return [];
+    return {
+      strategies: [],
+      aiProvider: 'error'
+    };
   }
 }
 /**
  * Generate an explanation for a specific strategy using AI
  * @param {Object} strategy - Strategy to explain
  * @param {Array} assets - User's assets
- * @returns {Promise<string>} - AI-generated explanation
+ * @returns {Promise<Object>} - Object containing AI-generated explanation and provider info
  */
 export async function generateStrategyExplanation(strategy, assets) {
   try {
@@ -55,12 +61,15 @@ export async function generateStrategyExplanation(strategy, assets) {
     }
     
     const data = await response.json();
-    return data.explanation;
+    return {
+      explanation: data.explanation,
+      aiProvider: data.aiProvider || 'unknown'
+    };
   } catch (error) {
     console.error('Error generating strategy explanation:', error);
     
     // Fallback explanation
-    return `
+    const fallbackExplanation = `
 ## Implementation of ${strategy.name}
 
 This strategy focuses on ${strategy.description.toLowerCase()}
@@ -77,5 +86,39 @@ This strategy focuses on ${strategy.description.toLowerCase()}
 ### How This Fits Your Portfolio
 This strategy provides a balanced approach for your current asset mix.
     `;
+    
+    return {
+      explanation: fallbackExplanation,
+      aiProvider: 'fallback-client'
+    };
+  }
+}
+
+/**
+ * Get the name of the current AI provider being used
+ * @returns {Promise<string>} - Name of the AI provider
+ */
+export async function getCurrentAIProvider() {
+  try {
+    // Make a lightweight call to check which provider is being used
+    const response = await fetch('/api/generate-strategy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        assets: [] // Empty assets to minimize processing
+      }),
+    });
+    
+    if (!response.ok) {
+      return 'unknown';
+    }
+    
+    const data = await response.json();
+    return data.aiProvider || 'unknown';
+  } catch (error) {
+    console.error('Error checking AI provider:', error);
+    return 'unknown';
   }
 }
