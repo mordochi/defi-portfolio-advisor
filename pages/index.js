@@ -279,8 +279,7 @@ export default function Home({
         if (data.job_id) {
           console.log(`Job ID received: ${data.job_id}. Starting polling...`);
           
-          // Set a message to show user that we're processing
-          setStrategies([{ name: 'Processing your request...', description: 'Please wait while we analyze your portfolio and generate strategies.' }]);
+          // Don't set any temporary strategies while processing
           
           // Use a more reliable polling approach with async/await and setTimeout
           const pollJobStatus = async (jobId) => {
@@ -346,41 +345,6 @@ export default function Home({
                     // Try to find strategies in result.data field
                     console.log('Strategies found in result.data field:', statusData.result.data.length);
                     setStrategies(statusData.result.data);
-                  } else if (statusData.aiProvider) {
-                    // If we have an aiProvider field, this is likely a direct AI response with strategies
-                    console.log('AI provider response detected:', statusData.aiProvider);
-                    if (statusData.strategies && Array.isArray(statusData.strategies)) {
-                      setStrategies(statusData.strategies);
-                    } else {
-                      // Generate mock strategies as a fallback
-                      console.log('Using AI-generated fallback strategies');
-                      setStrategies([
-                        {
-                          name: "Stablecoin Yield Farming",
-                          description: "Focus on generating yield from stablecoins with minimal risk",
-                          risk: "Low",
-                          expectedAPY: "3-5%",
-                          platforms: ["Aave", "Curve"],
-                          steps: [
-                            "Deposit USDC into Aave to earn base interest",
-                            "Use some stablecoins in Curve's stablecoin pools for additional yield",
-                            "Monitor positions weekly and rebalance as needed"
-                          ]
-                        },
-                        {
-                          name: "ETH Staking Plus",
-                          description: "Stake ETH while using derivatives for additional yield",
-                          risk: "Medium",
-                          expectedAPY: "5-8%",
-                          platforms: ["Lido", "Convex", "Aave"],
-                          steps: [
-                            "Stake ETH with Lido to receive stETH",
-                            "Provide stETH/ETH liquidity on Curve",
-                            "Stake LP tokens on Convex for boosted rewards"
-                          ]
-                        }
-                      ]);
-                    }
                   } else {
                     console.log('No strategies found in response, using empty array');
                     setStrategies([]);
@@ -445,7 +409,7 @@ export default function Home({
           // If no job_id, assume strategies are directly in the response
           setStrategies(data.strategies || []);
         }
-    } catch (error) {
+      } catch (error) {
       console.error("Error generating strategies:", error);
       // Display a user-friendly error message
       setStrategies([{ 

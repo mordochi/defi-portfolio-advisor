@@ -1,6 +1,4 @@
 import fetch from 'node-fetch';
-import { generateDeFiStrategies } from '../../utils/aiService';
-import { getAIProvider } from '../../utils/aiService';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,16 +14,8 @@ export default async function handler(req, res) {
 
     console.log('Received assets:', JSON.stringify(assets, null, 2));
     
-    // Get the current AI provider being used
-    const aiProvider = getAIProvider();
-    console.log(`Using AI provider: ${aiProvider}`);
-    
-    // Option 1: Use the AI service directly for strategy generation
-    const strategies = await generateDeFiStrategies(assets, protocols || []);
-    
-    // Option 2: If external portfolio analysis service is available, use it
-    // This is the original implementation that calls an external service
-    let portfolioData = { strategies };
+    // Call the external portfolio analysis service
+    let portfolioData = {};
     
     try {
       // Transform assets to the required format for external service
@@ -50,7 +40,7 @@ export default async function handler(req, res) {
         body: JSON.stringify(requestBody),
         // Set a short timeout to quickly fall back to AI-only approach if service is not available
         timeout: 2000,
-      }).catch(() => null);
+      });
       
       if (portfolioResponse && portfolioResponse.ok) {
         const externalData = await portfolioResponse.json();
@@ -62,27 +52,17 @@ export default async function handler(req, res) {
           externalData.result.investment_options && 
           externalData.result.investment_options.length > 0;
         
-        // Merge external data with AI-generated strategies
-        portfolioData = {
-          ...externalData,
-          // Always include our AI-generated strategies
-          strategies: strategies,
-          // Include the AI provider info
-          aiProvider
-        };
+        // Use the external data directly
+        portfolioData = externalData;
         
-        // Log whether we're using AI strategies or external data
-        console.log(`Using ${hasInvestmentOptions ? 'external investment options' : 'AI-generated strategies'}`);
+        console.log('Using external investment options');
       }
     } catch (serviceError) {
-      console.warn('External portfolio service unavailable, using AI-only approach', serviceError);
-      // Continue with AI-generated strategies only
+      console.warn('External portfolio service unavailable', serviceError);
+      // Return an error since we're not using fallback strategies
     }
     
-    return res.status(200).json({
-      ...portfolioData,
-      aiProvider
-    });
+    return res.status(200).json(portfolioData);
   } catch (error) {
     console.error('Error generating strategy:', error);
     return res.status(500).json({ message: 'Error generating strategy', error: error.message });
