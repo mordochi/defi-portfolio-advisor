@@ -111,110 +111,23 @@ export default function Home({
   
   // Convert investment options to strategies format
   const convertInvestmentOptionsToStrategies = (investmentOptions, userAssets) => {
-    // Group investment options by category
-    const groupedOptions = {};
-    
-    // Get asset symbols for reference
-    const assetSymbols = userAssets.map(asset => asset.asset_id.toUpperCase());
-    
-    // Group options by protocol category
-    investmentOptions.forEach(option => {
-      const category = option.category || 'DeFi';
-      if (!groupedOptions[category]) {
-        groupedOptions[category] = [];
-      }
-      groupedOptions[category].push(option);
-    });
-    
-    // Create strategies based on grouped options
-    const strategies = [];
-    
-    // Strategy 1: Stablecoin Yield Strategy
-    const stablecoinProtocols = investmentOptions.filter(option => 
-      option.protocol_name.toLowerCase().includes('aave') ||
-      option.protocol_name.toLowerCase().includes('lend') ||
-      option.protocol_name.toLowerCase().includes('usde')
-    );
-    
-    if (stablecoinProtocols.length > 0) {
-      strategies.push({
-        name: "Stablecoin Yield Strategy",
-        description: "Generate stable yields by depositing stablecoins into lending protocols",
-        risk: "Low",
-        expectedAPY: "3-5%",
-        platforms: stablecoinProtocols.map(p => p.protocol_name),
-        steps: [
-          "Deposit your stablecoins into lending protocols",
-          "Earn interest on your deposits",
-          "Monitor rates and rebalance as needed"
-        ]
-      });
+    // If no investment options are available, return an empty array
+    if (!investmentOptions || investmentOptions.length === 0) {
+      return [];
     }
     
-    // Strategy 2: ETH Staking Strategy
-    const stakingProtocols = investmentOptions.filter(option => 
-      option.protocol_name.toLowerCase().includes('lido') ||
-      option.protocol_name.toLowerCase().includes('stake') ||
-      option.protocol_name.toLowerCase().includes('eigen')
-    );
-    
-    if (stakingProtocols.length > 0 && assetSymbols.includes('ETH')) {
-      strategies.push({
-        name: "ETH Staking Strategy",
-        description: "Stake your ETH to earn passive yield while maintaining liquidity",
-        risk: "Medium",
-        expectedAPY: "4-7%",
-        platforms: stakingProtocols.map(p => p.protocol_name),
-        steps: [
-          "Stake your ETH with a liquid staking provider",
-          "Receive liquid staking tokens in return",
-          "Optionally use these tokens in DeFi protocols for additional yield"
-        ]
-      });
-    }
-    
-    // Strategy 3: Liquidity Provision Strategy
-    const dexProtocols = investmentOptions.filter(option => 
-      option.protocol_name.toLowerCase().includes('uniswap') ||
-      option.protocol_name.toLowerCase().includes('curve') ||
-      option.protocol_name.toLowerCase().includes('pendle')
-    );
-    
-    if (dexProtocols.length > 0) {
-      strategies.push({
-        name: "Liquidity Provision Strategy",
-        description: "Provide liquidity to decentralized exchanges to earn trading fees",
-        risk: "High",
-        expectedAPY: "5-15%",
-        platforms: dexProtocols.map(p => p.protocol_name),
-        steps: [
-          "Provide liquidity to trading pairs on DEXes",
-          "Earn trading fees and potential token rewards",
-          "Be aware of impermanent loss risks"
-        ]
-      });
-    }
-    
-    // If no strategies were created, create a generic one based on available options
-    if (strategies.length === 0 && investmentOptions.length > 0) {
-      // Take up to 3 random protocols
-      const selectedProtocols = investmentOptions
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Math.min(3, investmentOptions.length));
-      
-      strategies.push({
-        name: "Diversified DeFi Strategy",
-        description: "Diversify your assets across multiple DeFi protocols",
-        risk: "Medium",
-        expectedAPY: "4-8%",
-        platforms: selectedProtocols.map(p => p.protocol_name),
-        steps: [
-          "Allocate your assets across different protocols",
-          "Balance between yield and risk",
-          "Monitor performance and adjust as needed"
-        ]
-      });
-    }
+    // Convert each investment option to a strategy format
+    const strategies = investmentOptions.map(option => ({
+      name: option.protocol_name || 'DeFi Strategy',
+      description: option.description || `Investment opportunity with ${option.protocol_name}`,
+      risk: option.risk_level || 'Medium',
+      expectedAPY: option.apy ? `${option.apy}%` : 'Varies',
+      platforms: [option.protocol_name],
+      steps: option.steps || [
+        `Interact with ${option.protocol_name}`,
+        'Monitor your position regularly'
+      ]
+    }));
     
     return strategies;
   };
